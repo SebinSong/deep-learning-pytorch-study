@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import numpy as np
 
 ## 1. nnLinear()
 
@@ -66,10 +67,15 @@ import torch.nn as nn
 # print('word_vectors for this sentence: ', word_vectors)
 
 # 5. nn.LayerNorm()
-norm_layer = nn.LayerNorm(3)
-input_features = torch.tensor([
-  [1, 2, 3],
-  [4, 5, 6]
-], dtype=torch.float32)
-normalized_features = norm_layer(input_features)
-print(normalized_features)
+# norm_layer = nn.LayerNorm(3)
+# input_features = torch.tensor([
+#   [1, 2, 3],
+#   [4, 5, 6]
+# ], dtype=torch.float32)
+# normalized_features = norm_layer(input_features)
+# print(normalized_features)
+
+# arr = np.array([[10, 15, 20, 25, 30]])
+# result = np.where(arr > 20)
+# print(arr > 20)
+# print(result)
