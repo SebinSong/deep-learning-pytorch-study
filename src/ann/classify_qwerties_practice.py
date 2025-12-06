@@ -1,97 +1,110 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.optim as optim
 import matplotlib.pyplot as plt
 
-# Create data
-nPerClust = 100
-blur = 1 # basically just a std - defines how spread the data are around the center coordinate.
+torch.manual_seed(0)
+np.random.seed(0)
 
-A = [1, 1] # dataset 'a' is centered around (1, 1) - Cluster A
-B = [5, 1] # dataset 'b' is centered around (5, 1) - Cluster B
+clusterSize = 200
+blur = 1.5
+
+# Cluster center point
+A = [2, 3]
+B = [7, 7]
 
 a = [
-  A[0] + np.random.randn(nPerClust) * blur,
-  A[1] + np.random.randn(nPerClust) * blur
+  A[0] + np.random.randn(clusterSize) * blur,
+  A[1] + np.random.randn(clusterSize) * blur
 ]
 
 b = [
-  B[0] + np.random.randn(nPerClust) * blur,
-  B[1] + np.random.randn(nPerClust) * blur
+  B[0] + np.random.randn(clusterSize) * blur,
+  B[1] + np.random.randn(clusterSize) * blur
 ]
 
-# true labels
-labels_np = np.vstack(
-  (np.zeros((nPerClust, 1)), np.ones((nPerClust, 1)))
-)
+labels_np = np.vstack([
+  np.zeros((clusterSize, 1)), # label for A cluster is '0'
+  np.ones((clusterSize, 1)) # label for B cluster is '1'
+])
 
-# concatanate into a matrix
-data_np = np.hstack((a, b)).T
+data_np = np.hstack([a, b]).T
 
-# convert to a pytorch tensor
-data = torch.tensor(data_np).float()
-labels = torch.tensor(labels_np).float()
+labels = torch.tensor(labels_np, dtype=torch.float32)
+data = torch.tensor(data_np, dtype=torch.float32)
 
-print(data.shape)
-print(labels.shape)
-
-fig = plt.figure(figsize=(5, 5))
-plt.plot(data[np.where(labels==0)[0], 0], data[np.where(labels==0)[0], 1], 'bs')
-plt.plot(data[np.where(labels==1)[0], 0], data[np.where(labels==1)[0], 1], 'ko')
-plt.title('The qwerties!')
-plt.xlabel('qwerty dimension 1')
-plt.xlabel('qwerty dimension 2')
-plt.show()
-
-# Build the model
+# build a model
 ANNclassify = nn.Sequential(
   nn.Linear(2, 16),
   nn.ReLU(),
-  nn.Linear(16, 1),
-  nn.Sigmoid()
+  nn.Linear(16, 8),
+  nn.ReLU(),
+  nn.Linear(8, 1)
 )
 
-# Other model features
-learning_rate = 0.02
-num_epochs = 1000
+# other parameters
+learning_rate = 0.01
+num_epochs = 700
 
-# loss function 
-lossFun = nn.BCELoss()
+# loss function
+loss_fun = nn.BCEWithLogitsLoss()
+losses = np.zeros((num_epochs, 1))
 
 # optimizer
-optimizer = torch.optim.SGD(ANNclassify.parameters(), lr=learning_rate)
+optimizer = optim.Adam(ANNclassify.parameters(), lr=learning_rate)
 
-losses = np.zeros(num_epochs)
-
-for epoch_i in range(num_epochs):
+# train the model
+for epoch in range(num_epochs):
   # forward pass
   y_hat = ANNclassify(data)
 
-  # compute loss
-  loss = lossFun(y_hat, labels)
-  losses[epoch_i] = loss
+  # compute the loss
+  loss = loss_fun(y_hat, labels)
+  losses[epoch] = loss.item()
 
-  # backprop
+  # backward pass
   optimizer.zero_grad()
   loss.backward()
   optimizer.step()
 
-final_predictions = ANNclassify(data)
-predlabels = final_predictions > 0.5
+# final prediction
+y_prediction = ANNclassify(data)
+pred_labels = y_prediction > 0.5
+missclassified_idxs = np.where(pred_labels != labels)[0]
+model_accuracy_score = 1 - len(missclassified_idxs) / (clusterSize * 2)
 
-# find errors
-misclassified = np.where(predlabels != labels)[0]
+fig, ax = plt.subplots(1, 2, figsize=(10, 5))
 
-# total accuracy
-totalacc = 100 - 100 * len(misclassified) / (2 * nPerClust)
+# left graph
+ax[0].plot(
+  data[missclassified_idxs, 0],
+  data[missclassified_idxs, 1],
+  'rx',
+  markersize=12,
+  markeredgewidth=2
+)
 
-print(misclassified)
-print(totalacc)
+ax[0].plot(
+  data[np.where(labels==0)[0], 0],
+  data[np.where(labels==0)[0], 1],
+  'bs'
+)
 
-# print(final_predictions)
-# print(predlabels)
+ax[0].plot(
+  data[np.where(labels==1)[0], 0],
+  data[np.where(labels==1)[0], 1],
+  'yo'
+)
 
-# plt.plot(losses, 'o', markerfacecolor='w', linewidth=0.1)
-# plt.xlabel('Epoch')
-# plt.ylabel('Loss')
-# plt.show()
+ax[0].set_xlabel('feature 1')
+ax[0].set_ylabel('feature 2')
+ax[0].legend(['Misclassified', 'cluster A', 'cluster B'])
+ax[0].set_title(f'{model_accuracy_score:.2%}% accurate')
+
+
+ax[1].plot(losses, 'bo', markerfacecolor='w')
+ax[1].set_xlabel('epoch')
+ax[1].set_ylabel('loss')
+
+plt.show()

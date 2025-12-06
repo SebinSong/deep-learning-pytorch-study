@@ -79,3 +79,9 @@ import numpy as np
 # result = np.where(arr > 20)
 # print(arr > 20)
 # print(result)
+
+t1 = torch.tensor([
+  [2, 4, 6, 8],
+  [12, 14, 16, 18],
+  [21, 22, 33, 44]
+])
