@@ -80,8 +80,68 @@ import numpy as np
 # print(arr > 20)
 # print(result)
 
-t1 = torch.tensor([
-  [2, 4, 6, 8],
-  [12, 14, 16, 18],
-  [21, 22, 33, 44]
-])
+# t1 = torch.tensor([
+#   [2, 4, 6, 8],
+#   [12, 14, 16, 18],
+#   [21, 22, 33, 44]
+# ])
+
+# clusterSize = 5
+# blur = 1.5
+
+# center = {
+#   'A': (2, 3),
+#   'B': (7, 3)
+# }
+
+# a = np.array([
+#   center['A'][0] + np.random.randn(clusterSize) * blur,
+#   center['A'][1] + np.random.randn(clusterSize) * blur
+# ], dtype=np.float32).T
+# b = np.array([
+#   center['B'][0] + np.random.randn(clusterSize) * blur,
+#   center['B'][1] + np.random.randn(clusterSize) * blur
+# ]).T
+
+# at = torch.from_numpy(a)
+# bt = torch.from_numpy(b)
+# stacked = torch.vstack((at, bt))
+# labels = torch.vstack((
+#   torch.zeros(at.shape[0], 1),
+#   torch.ones(bt.shape[0], 1)
+# ))
+
+# print(stacked)
+# print(labels)
+
+# t1 = torch.rand(10, 1)
+# t2 = torch.rand(10, 1) > 0.5
+# floated_t2 = t2.float()
+
+# print(t1)
+# print(floated_t2.mean())
+
+# t_labels = torch.tensor([
+#   0, 1, 1, 0, 1, 1, 0
+# ], dtype=torch.float32)
+# t_prediction = torch.tensor([
+#   -1.23, 5.12, -3.5, -2.1, 10.5, -1.3, -42.11
+# ], dtype=torch.float32)
+# t_transformed_prediction = torch.where(t_prediction > 0, 1, 0).type(torch.float32)
+
+# compared = (t_transformed_prediction == t_labels).float().mean() * 100
+# print(f'{compared:.2f}%')
+
+# t1 = torch.full((10,), 1.5).type(torch.float)
+# print(t1.numel())
+
+# num_rows = 5
+# learning_rates = np.linspace(0.001, 0.1, num_rows, dtype=np.float32)
+# accuracies = np.zeros((num_rows, 2))
+# for i, lr in enumerate(learning_rates):
+#   accuracies[i, :] = [i, lr]
+
+# print(accuracies)
+
+a_n = float(np.random.randn(1))
+print(f'asdf {a_n:>10.5f} adf')
