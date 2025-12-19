@@ -20,7 +20,7 @@ y_true = X @ true_W + true_b + torch.randn(N, D_out) * 0.1 # Add a little noise
 
 # Set hyper-parameters
 learning_rate, epochs = 0.01, 350
-11
+
 # Initialize the model parameters
 W = torch.randn(D_in, D_out, requires_grad=True)
 b = torch.randn(1, requires_grad=True)

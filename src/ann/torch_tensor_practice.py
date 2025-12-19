@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import numpy as np
+import matplotlib.pyplot as plt
 
 ## 1. nnLinear()
 
@@ -143,5 +144,66 @@ import numpy as np
 
 # print(accuracies)
 
-a_n = float(np.random.randn(1))
-print(f'asdf {a_n:>10.5f} adf')
+N = 50
+
+D_in = 1
+D_out = 1
+
+X = torch.randn(N, D_in)
+
+class LinearRegressionModel(nn.Module):
+  def __init__(self, in_features, out_features):
+    super().__init__()
+
+    self.linear_layer = nn.Linear(in_features, 16)
+    self.activation_layer = nn.ReLU()
+    self.output_layer = nn.Linear(16, out_features)
+
+  def forward(self, X):
+    # In the forward pass, we connect the layers
+    t1 = self.linear_layer(X)
+    t1_0 = self.activation_layer(t1)
+    return self.output_layer(t1_0)
+
+model = LinearRegressionModel(D_in, D_out)
+
+true_W = torch.tensor([[2.0]])
+true_b = torch.tensor(1.0)
+y_true = X @ true_W + true_b + torch.randn(N, D_out) * 1.5
+
+learning_rate, epochs = 0.01, 350
+
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+loss_fn = nn.MSELoss()
+
+tracked_losses = np.zeros(epochs, dtype=float)
+
+for epoch in range(epochs):
+  y_hat = model(X)
+
+  loss = loss_fn(y_hat, y_true)
+
+  tracked_losses[epoch] = loss.item()
+
+  optimizer.zero_grad()
+  loss.backward()
+  optimizer.step()
+
+# final prediction
+predictions = model(X)
+
+fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+
+ax[0].plot(X[:, 0], y_true[:, 0], 'bo', label='True data')
+ax[0].plot(X[:, 0], predictions.detach()[:, 0], 'ro', label='Prediction data')
+ax[0].set_xlabel('input')
+ax[0].set_ylabel('output')
+ax[0].legend()
+ax[0].set_title('Real vs Final prediction')
+
+ax[1].plot(np.arange(epochs), tracked_losses, 'bo-', markerfacecolor='w')
+ax[1].set_xlabel('Epoch')
+ax[1].set_ylabel('Loss')
+ax[1].set_title('Loss change')
+
+plt.show()
