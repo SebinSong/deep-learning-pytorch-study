@@ -1,33 +1,29 @@
 import torch
 
-nn = torch.nn
+# nn = torch.nn
 
-widenet = nn.Sequential(
-  nn.Linear(2, 4), # hidden layer
-  nn.Linear(4, 3) # output layer
-)
+# widenet = nn.Sequential(
+#   nn.Linear(2, 4), # hidden layer
+#   nn.Linear(4, 3) # output layer
+# )
 
-deepnet = nn.Sequential(
-  nn.Linear(2, 2), # hidden layer
-  nn.Linear(2, 2), # hidden layer
-  nn.Linear(2, 3) # output layer
-)
+# deepnet = nn.Sequential(
+#   nn.Linear(2, 2), # hidden layer
+#   nn.Linear(2, 2), # hidden layer
+#   nn.Linear(2, 3) # output layer
+# )
 
-# num_node_in_widenet = 0
-# for p in widenet.named_parameters():
-#   if 'bias' in p[0]:
-#     num_node_in_widenet += p[1].numel()
+# def get_num_nodes(model):
+#   return sum([ p_params.numel() for p_name, p_params in model.named_parameters() if 'bias' in p_name ])
 
-# num_node_in_deepent = 0
-# for pName, pVector in deepnet.named_parameters():
-#   if 'bias' in pName:
-#     num_node_in_deepent += pVector.numel()
+# def get_num_params(model):
+#   return sum([ p_tensor.numel() for p_tensor in model.parameters() if p_tensor.requires_grad ])
 
-# print(f'num of nodes wide: {num_node_in_widenet}')
-# print(f'num of nodes deep: {num_node_in_deepent}')
+# print(f'widenet - N of nodes: {get_num_nodes(widenet)}, N of trainable params: {get_num_params(widenet)}')
+# print(f'deepnet - N of nodes: {get_num_nodes(deepnet)}, N of trainable params: {get_num_params(deepnet)}')
 
-n_params_wide = sum([ p.numel() for p in widenet.parameters() if p.requires_grad ])
-n_params_deep = sum([ p.numel() for p in deepnet.parameters() if p.requires_grad ])
-
-print('n_params_wide: ', n_params_wide)
-print('n_params_deep: ', n_params_deep)
+tup_list = [('a', 1), ('b', 2), ('c', 3)]
+dict_from_tup = dict(tup_list)
+dict1 = { k:v for k,v in tup_list }
+print(dict_from_tup)
+print(dict1)
