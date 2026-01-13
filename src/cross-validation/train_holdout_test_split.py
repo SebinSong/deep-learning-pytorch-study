@@ -23,3 +23,29 @@ test_loader = DataLoader(test_data, shuffle=False)
 
 for batch_X, batch_y in train_loader:
   print(f'{batch_X=}, {batch_y=}')
+
+# manual split using numpy
+labels_len = len(fakelabels)
+partitions = np.array([.8, .1, .1])
+partitionBnd = np.cumsum(labels_len * partitions).astype(int)
+randindices = np.random.permutation(labels_len)
+
+train_dataN = fakedata[randindices[:partitionBnd[0]], :]
+train_labelN = fakelabels[randindices[:partitionBnd[0]]]
+
+devset_dataN = fakedata[
+  randindices[partitionBnd[0]:partitionBnd[1]], :
+]
+devset_labelN = fakelabels[randindices[partitionBnd[0]:partitionBnd[1]]]
+
+test_dataN = fakedata[
+  randindices[partitionBnd[1]:partitionBnd[2]], :
+]
+test_labelN = fakelabels[randindices[partitionBnd[1]:partitionBnd[2]]]
+
+print(train_dataN)
+print(train_labelN)
+print(devset_dataN)
+print(devset_labelN)
+print(test_dataN)
+print(test_labelN)

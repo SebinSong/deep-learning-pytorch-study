@@ -35,7 +35,17 @@ from torch.utils.data import TensorDataset, DataLoader
 #     if i == 0:
 #       print(f'epoch[{epoch_i}] - X: {X}')
 
-t1 = torch.randint(1, 15, (4, 5))
-numel = t1.numel()
-unique_t1 = torch.unique(t1)
-print(unique_t1, unique_t1.numel())
+# t1 = torch.randint(1, 15, (4, 5))
+# numel = t1.numel()
+# unique_t1 = torch.unique(t1)
+# print(unique_t1, unique_t1.numel())
+
+n1 = np.arange(0, 20).reshape((4, 5))
+summed_n1 = np.cumsum(n1)
+
+n2 = np.arange(2, 50)
+partitions = np.array([0.25, .35, .15, .25])
+partitionsBnd = np.cumsum(len(n2) * partitions).astype(int)
+print(n2)
+
+rand_indices = np.random.permutation(len(n2))
