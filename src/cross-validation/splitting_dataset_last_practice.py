@@ -24,7 +24,7 @@ def split_by_sklearn():
 
   train_data, test_temp_data, train_labels, test_temp_labels = \
     train_test_split(fake_data, fake_labels, train_size=partitions[0])
-  
+
   split = partitions[1] / np.sum(partitions[1:])
   devset_data, testset_data, devset_labels, testset_labels = \
     train_test_split(test_temp_data, test_temp_labels, train_size=split)
