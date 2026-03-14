@@ -83,22 +83,34 @@ def train_the_model(model, loss_func, optimizer, train_dlr, test_dlr):
 
   return train_acc, test_acc, losses
 
+# do experiments
 train_dlr, test_dlr = split_dataset(dataset)
-model, loss_func, optimizer = create_model()
-train_acc, test_acc, losses = train_the_model(model, loss_func, optimizer, train_dlr, test_dlr)
+l2_lambdas = np.linspace(0, 0.1, 10)
 
-fig, ax = plt.subplots(1, 2, figsize=(15, 5))
+acc_results_train = np.zeros((num_epochs, len(l2_lambdas)))
+acc_results_test = np.zeros((num_epochs, len(l2_lambdas)))
 
-ax[0].plot(losses, 'k^-')
-ax[0].set_ylabel('Loss')
-ax[0].set_xlabel('Epochs')
-ax[0].set_title(f'Losses with L2 (lambda={0.01})')
+for li, l2_lamb in enumerate(l2_lambdas):
+  model, loss_func, optimizer = create_model(l2_lamb)
+  train_acc, test_acc, losses = train_the_model(model, loss_func, optimizer, train_dlr, test_dlr)
 
-ax[1].plot(train_acc, 'ro-')
-ax[1].plot(test_acc, 'bs-')
-ax[1].set_title(f'Accuracy with L2 (lambda={0.01})')
-ax[1].set_xlabel('Epochs')
-ax[1].set_ylabel('Accuracy (%)')
-ax[1].legend(['Train', 'Test'])
+  # store train results
+  acc_results_train[:, li] = train_acc
+  acc_results_test[:, li] = test_acc
 
+epoch_range = [500, 950]
+
+plt.plot(
+  l2_lambdas,
+  np.mean(acc_results_train[epoch_range[0]:epoch_range[1], :], axis=0),
+  'bo-', label='Train'
+)
+plt.plot(
+  l2_lambdas,
+  np.mean(acc_results_test[epoch_range[0]:epoch_range[1], :], axis=0),
+  'rs-', label='Test'
+)
+plt.xlabel('L2 regularization amount')
+plt.ylabel('Accuracy')
+plt.legend()
 plt.show()

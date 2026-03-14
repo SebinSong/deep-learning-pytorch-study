@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 F = torch.nn.functional
 
@@ -19,3 +20,15 @@ F = torch.nn.functional
 # )
 # print(cat)
 
+result1 = 5 + np.random.randn(20)
+result2 = 10 + np.random.randn(20)
+two_sets = np.zeros((20, 2))
+two_sets[:, 0] = result1
+two_sets[:, 1] = result2
+
+plt.plot(list(range(1, 41, 2)), two_sets)
+plt.xlabel('Indexes')
+plt.ylabel('values')
+plt.title('Values per index')
+plt.legend(['Result 1', 'Result 2'])
+plt.show()
