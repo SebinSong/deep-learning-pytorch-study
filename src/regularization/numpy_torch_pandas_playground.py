@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -44,15 +45,34 @@ F = torch.nn.functional
 # print(t2)
 # print(two_cols)
 
-result1 = 5 + np.random.randn(20)
-result2 = 10 + np.random.randn(20)
-two_sets = np.zeros((20, 2))
-two_sets[:, 0] = result1
-two_sets[:, 1] = result2
+# result1 = 5 + np.random.randn(20)
+# result2 = 10 + np.random.randn(20)
+# two_sets = np.zeros((20, 2))
+# two_sets[:, 0] = result1
+# two_sets[:, 1] = result2
 
-plt.plot(list(range(1, 41, 2)), two_sets)
-plt.xlabel('Indexes')
-plt.ylabel('values')
-plt.title('Values per index')
-plt.legend(['Result 1', 'Result 2'])
-plt.show()
+# plt.plot(list(range(1, 41, 2)), two_sets)
+# plt.xlabel('Indexes')
+# plt.ylabel('values')
+# plt.title('Values per index')
+# plt.legend(['Result 1', 'Result 2'])
+# plt.show()
+
+D_in = 4
+D_out = 3
+hunits = 16
+
+net = nn.Sequential(
+  nn.Linear(D_in, hunits),
+  nn.ReLU(),
+  nn.Linear(hunits, hunits),
+  nn.ReLU(),
+  nn.Linear(hunits, D_out)
+)
+
+fakedata = torch.randn((20, D_in)) * 3
+fake_output = net(fakedata)
+argmaxed = torch.argmax(fake_output, dim=1)
+
+print(fake_output.shape)
+print(argmaxed, type(argmaxed), argmaxed.shape)

@@ -1,5 +1,7 @@
 import torch
+import torch.nn as nn
 import matplotlib.pyplot as plt
+import numpy as np
 from torch.utils.data import DataLoader, TensorDataset, random_split
 import seaborn as sns
 
@@ -12,8 +14,11 @@ iris = sns.load_dataset('iris')
 
 data = torch.tensor( iris[iris.columns[:-1]].values, dtype=torch.float32)
 labels_mapping = { 'setosa': 0, 'versicolor': 1, 'virginica': 2 }
-labels = torch.tensor(iris['species'].map(labels_mapping).values, dtype=torch.long)
+labels = torch.tensor(iris['species'].map(labels_mapping).fillna(-1).values, dtype=torch.long)
 dataset = TensorDataset(data, labels)
+
+D_in = len(iris.columns[:-1])
+D_out = torch.unique(labels).numel()
 
 def split_data(dset, train_prop=.8, batch_size=16):
   sample_size = len(dset)
@@ -27,8 +32,76 @@ def split_data(dset, train_prop=.8, batch_size=16):
 
   return train_loader, test_loader
 
-train_loader, test_loader = split_data(dataset)
+def create_model (learning_rate=0.005, hunits=64):
+  net = nn.Sequential(
+    nn.Linear(D_in, hunits),
+    nn.ReLU(),
+    nn.Linear(hunits, hunits),
+    nn.ReLU(),
+    nn.Linear(hunits, D_out)
+  )
 
-for X, y in train_loader:
-  print(X.shape, y.shape)
-  
+  lf = nn.CrossEntropyLoss()
+
+  op = torch.optim.SGD(net.parameters(), lr=learning_rate)
+
+  return net, lf, op
+
+def train_model(model, loss_func, optimizer, train_ldr, test_ldr, / , num_epochs=500):
+  train_acc = np.zeros(num_epochs)
+  test_acc = np.zeros(num_epochs)
+  losses = np.zeros(num_epochs)
+
+  for epoch_i in range(num_epochs):
+    batch_accs = []
+    batch_losses = []
+
+    model.train()
+    for batch_x, batch_y in train_ldr:
+      # forward pass
+      y_hat = model(batch_x)
+
+      # compute the loss
+      loss = loss_func(y_hat, batch_y)
+      batch_losses.append(loss.item())
+
+      # backprop
+      optimizer.zero_grad()
+      loss.backward()
+      optimizer.step()
+
+      # compute the batch accuracy
+      curr_acc = 100 * (torch.argmax(y_hat, dim=1) == batch_y).float().mean()
+      batch_accs.append(curr_acc.item())
+
+    train_acc[epoch_i] = np.mean(batch_accs)
+    losses[epoch_i] = np.mean(batch_losses)
+
+    # compute test accuracy
+    model.eval()
+    with torch.no_grad():
+      test_x, test_y = next(iter(test_ldr))
+      test_pred_labels = torch.argmax(model(test_x), dim=1)
+      test_acc[epoch_i] = 100 * (test_pred_labels == test_y).float().mean()
+
+  return train_acc, test_acc, losses
+
+train_loader, test_loader = split_data(dataset)
+model, loss_func, optimizer = create_model()
+train_acc, test_acc, losses = train_model(model, loss_func, optimizer, train_loader, test_loader, num_epochs=600)
+
+fig, ax = plt.subplots(1, 2, figsize=(17, 7))
+
+ax[0].plot(losses, 'k^-')
+ax[0].set_title('Losses trend')
+ax[0].set_xlabel('Epoch')
+ax[0].set_ylabel('Loss')
+
+ax[1].plot(train_acc, 'bo-', label='Train')
+ax[1].plot(test_acc, 'rs-', label='Test')
+ax[1].set_xlabel('Epoch')
+ax[1].set_ylabel('Accuracy (%)')
+ax[1].set_title('Accuracy trend')
+ax[1].legend()
+
+plt.show()
