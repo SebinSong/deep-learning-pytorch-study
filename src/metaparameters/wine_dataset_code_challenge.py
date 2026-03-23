@@ -91,7 +91,38 @@ def create_model(learning_rate=.01):
 
 def train_model(batch_size=16):
   train_ldr, test_ldr = split_data(dataset, batch_size=batch_size)
-  model, loss_func, optimzer = create_model()
+  model, loss_func, optimizer = create_model()
 
+  train_acc = np.zeros(num_epochs)
+  test_acc = np.zeros(num_epochs)
   for epoch_i in range(num_epochs):
-    pass # TODO!
+    batch_acc = []
+
+    model.train()
+    for batch_x, batch_y in train_ldr:
+      y_hat = model(batch_x)
+
+      loss = loss_func(y_hat, batch_y)
+
+      optimizer.zero_grad()
+      loss.backward()
+      optimizer.step()
+
+      # compute the current batch acc
+      pred_labels = y_hat > 0
+      acc = (pred_labels == batch_y).float().mean() * 100
+      batch_acc.append(acc.item())
+
+    train_acc[epoch_i] = np.mean(batch_acc)
+
+    # compute the train-accuracy
+    model.eval()
+    test_x, test_y = next(iter(test_ldr))
+    with torch.no_grad():
+      test_pred_labels = model(test_x) > 0
+      curr_test_acc = (test_pred_labels == test_y).float().mean() * 100
+      test_acc[epoch_i] = curr_test_acc.item()
+
+  return train_acc, test_acc
+
+train_acc, test_acc = train_model()
