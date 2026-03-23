@@ -58,7 +58,7 @@ def split_data(dset, train_prop=.8, batch_size=16):
 
   train_dset, test_dset = random_split(dset, [train_size, test_size])
 
-  train_loader = DataLoader(train_dset, batch_size=batch_size, shuffle=True)
+  train_loader = DataLoader(train_dset, batch_size=batch_size, drop_last=True, shuffle=True)
   test_loader = DataLoader(test_dset, batch_size=test_size, shuffle=False)
 
   return train_loader, test_loader
