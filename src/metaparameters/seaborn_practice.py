@@ -1,10 +1,11 @@
 import seaborn as sns
+import numpy as np
 import matplotlib.pyplot as plt
 from ucimlrepo import fetch_ucirepo
 
 sns.set_theme()
-# tips = sns.load_dataset('tips')
-# penguins = sns.load_dataset('penguins')
+tips = sns.load_dataset('tips')
+penguins = sns.load_dataset('penguins')
 
 def kde_with_histogram():
   wine_df = fetch_ucirepo(id=186) # wine-quality dataset
@@ -19,3 +20,6 @@ def kde_with_histogram():
   plt.show()
 
 kde_with_histogram()
+
+arr = np.array([2**n for n in range(1, 9)])
+print(arr)

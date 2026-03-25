@@ -33,7 +33,7 @@ def draw_violin_plot(df):
   plt.show()
 
 # hyper-parameters
-num_epochs = 1000
+num_epochs = 700
 
 # prepare torch dataset
 wine_quality = fetch_ucirepo(id=186)
@@ -51,17 +51,13 @@ dataset = TensorDataset(
   torch.tensor(wine_target_transformed.values).float()
 )
 
-def split_data(dset, train_prop=.8, batch_size=16):
+def split_data(dset, train_prop=.8):
   sample_size = len(dset)
   train_size = int(sample_size * train_prop)
   test_size = sample_size - train_size
 
   train_dset, test_dset = random_split(dset, [train_size, test_size])
-
-  train_loader = DataLoader(train_dset, batch_size=batch_size, drop_last=True, shuffle=True)
-  test_loader = DataLoader(test_dset, batch_size=test_size, shuffle=False)
-
-  return train_loader, test_loader
+  return train_dset, test_dset
 
 # model architecture
 class QualityClassifier(nn.Module):
@@ -89,8 +85,7 @@ def create_model(learning_rate=.01):
 
   return model, lf, opt
 
-def train_model(batch_size=16):
-  train_ldr, test_ldr = split_data(dataset, batch_size=batch_size)
+def train_model(train_ldr, test_ldr):
   model, loss_func, optimizer = create_model()
 
   train_acc = np.zeros(num_epochs)
@@ -125,4 +120,37 @@ def train_model(batch_size=16):
 
   return train_acc, test_acc
 
-train_acc, test_acc = train_model()
+batch_sizes = np.array([2**n for n in range(1, 9)])
+all_train_acc = np.zeros((num_epochs, len(batch_sizes)))
+all_test_acc = np.zeros((num_epochs, len(batch_sizes)))
+total_times = np.zeros(len(batch_sizes))
+
+train_dset, test_dset = split_data(dataset)
+test_ldr = DataLoader(test_dset, batch_size=len(test_dset), shuffle=False)
+
+for bi, curr_batch_size in enumerate(batch_sizes):
+  train_ldr = DataLoader(train_dset, batch_size=curr_batch_size, shuffle=True, drop_last=True)
+  start_time = time.perf_counter()
+  train_acc, test_acc = train_model(train_ldr, test_ldr, batch_size=curr_batch_size)
+  end_time = time.perf_counter()
+
+  all_train_acc[:, bi] = train_acc
+  all_test_acc[:, bi] = test_acc
+  total_times[bi] = end_time - start_time
+
+fig, ax = plt.subplots(1, 3, figsize=(20, 6))
+ax[0].plot(all_train_acc)
+ax[0].set_title('Train accuracy')
+ax[1].plot(all_test_acc)
+ax[1].set_title('Test accuracy')
+
+for i in range(2):
+  ax[i].set_xlabel('Epoch')
+  ax[i].set_ylabel('Accuracy (%)')
+  ax[i].legend(list(batch_sizes))
+  ax[i].set_ylim([50, 100])
+  ax[i].grid()
+
+ax[2].plot(batch_sizes, total_times)
+plt.show()
+
