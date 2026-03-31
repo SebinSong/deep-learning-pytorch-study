@@ -65,5 +65,48 @@ def section_2 ():
 
   plt.show()
 
+def section_3 ():
+  # x = torch.linspace(-3, 9, 101)
+  # relu6 = torch.nn.ReLU6()
+
+  # plt.plot(x, relu6(x))
+  # plt.show()
+
+  x = torch.linspace(-3, 3, 21)
+  y1 = torch.relu(x)
+
+  y2 = torch.nn.ReLU()(x)
+
+  plt.plot(x, y1, 'ro', label='torch.relu')
+  plt.plot(x, y2, 'bx', label='torch.nn.ReLU')
+  plt.legend()
+  plt.xlabel('Input')
+  plt.ylabel('Output')
+  plt.show()
+
+def section_4 ():
+  x1 = torch.linspace(-1, 1, 20)
+  x2 = 2*x1
+
+  # weights
+  w1 = -0.3
+  w2 = 0.5
+
+  linpart = x1 * w1 + x2 * w2
+
+  # non-linear output
+  y = torch.relu(linpart)
+  print(x1)
+  print(linpart)
+
+  plt.plot(x1, linpart, 'bo-', label='Linear input')
+  plt.plot(x1, y, 'rs', label='Nonlinear output')
+  plt.xlabel('x1 variable')
+  plt.ylabel('$\\hat{y}$')
+  plt.legend()
+  plt.show()
+
 # section_1()
-section_2()
+# section_2()
+# section_3()
+section_4()
