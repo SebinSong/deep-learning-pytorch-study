@@ -33,7 +33,7 @@ import numpy as np
 # first_5 = iris.head(5)
 # dtypes = first_5.dtypes
 
-# titanic = pd.read_csv(resolve_path('../data_samples/titanic.csv'))
+# titanic = pd.read_csv(resolve_path('../data/titanic.csv'))
 # sns.pairplot(titanic, hue='Survived')
 # plt.show()
 
