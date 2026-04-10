@@ -22,27 +22,20 @@ def load_data():
 
 data, labels = load_data()
 
-# Normalize the data to a range of [0, 1]
-# NOTE: It is minmax normalization here but if batch-norm is used inside the model, z-scoring is preferred and works better.
 data_normalized = data / torch.max(data)
-dataset = TensorDataset(data_normalized, labels)
+data_binarized = (data_normalized >= 0.5).float()
+dataset = TensorDataset(data_binarized, labels)
 
-show_data_distribution = False
+draw_an_example = False
+if draw_an_example:
+  rand_idx = 2
+  fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+  ax1.imshow(data[rand_idx].reshape(28, -1), cmap='gray')
+  ax1.set_title('Original data')
+  ax2.imshow(data_binarized[rand_idx].reshape(28, -1), cmap='gray', vmin=0, vmax=1)
+  ax2.set_title('Binarized data')
 
-if show_data_distribution:
-  _, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
-
-  ax1.hist(data.flatten(), 50)
-  ax1.set_xlabel('Pixel intensity values')
-  ax1.set_ylabel('Count')
-  ax1.set_title('Histogram of original data')
-  ax1.set_yscale('log')
-
-  ax2.hist(data_normalized.flatten(), 50)
-  ax2.set_xlabel('Pixel intensity values')
-  ax2.set_ylabel('Count')
-  ax2.set_title('Histogram of normalized data')
-
+  plt.suptitle(f'Label: {labels[rand_idx]}')
   plt.show()
 
 def split_data(dset, train_prop=.9, batch_size=32):
@@ -119,8 +112,11 @@ def train_model(train_ldr, test_ldr, num_epochs=60):
       batch_acc = (pred_labels == batch_y).float().mean() * 100
       all_batch_acc.append( batch_acc.item() )
 
-    all_losses[epoch_i] = np.mean( all_batch_losses )
-    all_train_acc[epoch_i] = np.mean( all_batch_acc )
+    curr_ave_loss = np.mean( all_batch_losses )
+    curr_ave_acc = np.mean( all_batch_acc )
+    all_losses[epoch_i] = curr_ave_loss
+    all_train_acc[epoch_i] = curr_ave_acc
+    print(f'Epoch[{epoch_i}]: train_acc - {curr_ave_acc:.2%}%, loss - {curr_ave_loss:.3f}')
 
     test_x, test_y = next(iter(test_ldr))
 
@@ -155,32 +151,3 @@ if draw_result_plot:
   ax2.legend()
 
   plt.show()
-
-# inspecting the results in more details
-test_x, test_y = next(iter(test_loader))
-with torch.no_grad():
-  final_predictions = model(test_x)
-
-# sample_idx_to_show = 120
-
-# plt.bar(range(10), final_predictions[sample_idx_to_show])
-# plt.xticks(range(10))
-# plt.xlabel('Number')
-# plt.ylabel('Evidence for that number')
-# plt.title(f'True number was {test_y[sample_idx_to_show].item()}')
-# plt.show()
-
-error_idxs = torch.where(torch.argmax(final_predictions, dim=1) != test_y)[0]
-random_n = int(torch.rand(1).item() * len(error_idxs))
-picked_err_idx = error_idxs[random_n]
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
-
-ax1.bar(range(10), np.exp(final_predictions[picked_err_idx]))
-ax1.set_xticks(range(10))
-ax1.set_xlabel('Number')
-ax1.set_ylabel('Evidence for that number')
-ax1.set_title(f'True number: {test_y[picked_err_idx]}, Model guess: {torch.argmax(final_predictions[picked_err_idx]).item()}')
-
-ax2.imshow(torch.reshape( test_x[picked_err_idx], (28, 28)), cmap='gray')
-
-plt.show()
