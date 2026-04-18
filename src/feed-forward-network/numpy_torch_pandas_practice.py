@@ -62,7 +62,37 @@ import matplotlib.pyplot as plt
 # diffed_b = np.diff(a1[:, [0, 2]], axis=1)
 # print(diffed_b)
 
-a1 = np.array([1, 2, 3])
-b1 = np.array([3, 5, 7])
-c = a1 + b1
-print(c)
+# practice np.roll()
+
+# a1 = np.array([1, 2, 3])
+# b1 = np.array([3, 5, 7])
+# c1 = np.vstack((a1, b1))
+# c = a1 + b1
+
+# d1 = np.roll(c1, 1, axis=0)
+# d2 = np.roll(c1, 2, axis=1)
+# print(c1)
+# print(d1)
+# print(d2)
+
+# rand_num = np.random.randint(1, 10, 10)
+# print(rand_num, type(rand_num))
+
+# rand_idxs = np.random.permutation(100)
+# print(rand_idxs[:10])
+
+
+data = [1, 2, 1, 3, 4, 1, 2, 5]
+max_n = np.max(data)
+arr = np.arange(0, np.max(data) + 1)
+uniq = np.unique(data)
+uniq.sort()
+
+np_data = np.array(data)
+for n in np_data:
+  print(n)
+
+
+# hist, bin_edges = np.histogram(data, bins=arr)
+# print(hist)
+# print(bin_edges)
