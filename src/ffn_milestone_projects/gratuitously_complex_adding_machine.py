@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from torch.utils.data import TensorDataset, DataLoader, random_split
 
 # create dataset
-def generate_data_and_labels(n = 20, randomize=False):
+def generate_data_and_labels(n = 50, randomize=False):
   data = []
   labels = []
 
@@ -26,7 +26,7 @@ def generate_data_and_labels(n = 20, randomize=False):
 
   return data_t, labels_t
 
-def create_and_split_data(n = 20, train_prop=.8, batch_size=16):
+def create_and_split_data(n = 50, train_prop=.8, batch_size=16):
   data_t, labels_t = generate_data_and_labels(n)
 
   dset = TensorDataset(data_t, labels_t)
@@ -46,8 +46,6 @@ def create_and_split_data(n = 20, train_prop=.8, batch_size=16):
 D_in = 2
 D_out = 1
 num_epochs = 20
-
-train_loader, test_loader = create_and_split_data()
 
 class Addition_ANN(nn.Module):
   def __init__(self):
@@ -140,7 +138,7 @@ ax1.legend(['Train', 'Test'])
 ax1.set_title('Final accuracies per experiment')
 
 my_own_val_set = [
-  [1, 5], [-3, 8], [-4, -12], [0, 17], [10, -7], [-14, 2], [13, 7]
+  [100, 124], [-120, -8], [-55, -22], [40, 25], [-30, 27], [-250, 32], [300, 5000]
 ]
 
 val_data, val_labels = generate_data_and_labels(randomize=True)
