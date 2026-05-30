@@ -11,12 +11,13 @@ class ANN_Model(nn.Module):
     super().__init__()
 
     self.layers = nn.ModuleDict({
-      'input': nn.Linear(100, 2**8),
-      'fc1': nn.Linear(2**8, 2**7),
-      'fc2': nn.Linear(2**7, 2**5),
-      'fc3': nn.Linear(2**5, 2**4),
-      'output': nn.Linear(2**4, 2)
+      'input': nn.Linear(100, 100),
+      'fc1': nn.Linear(100, 100),
+      'fc2': nn.Linear(100, 100),
+      'fc3': nn.Linear(100, 100),
+      'output': nn.Linear(100, 2)
     })
+
   
   def forward(self, x):
     x = F.relu( self.layers['input'](x) )
@@ -25,7 +26,17 @@ class ANN_Model(nn.Module):
     x = F.relu( self.layers['fc3'](x) )
     return self.layers['output'](x)
 
-model = ANN_Model()
+class ANN_Model_Xavier(ANN_Model):
+  def __init__(self):
+    super().__init__()
+
+    self.apply(self._init_weights)
+
+  def _init_weights(self, module):
+    if isinstance(module, nn.Linear):
+      nn.init.kaiming_uniform_(module.weight, nonlinearity='relu')
+
+model = ANN_Model_Xavier()
 
 # collect all weights and biases
 version_one = False
@@ -36,6 +47,7 @@ if version_one:
   all_biases = np.array([])
 
   for name, p in model.named_parameters():
+    # p.data() is how we access the actual tensor of the parameters, and .flatten() is how we convert them to 1D arrays.
     if 'weight' in name:
       all_weights = np.concatenate((all_weights, p.data.detach().numpy().flatten()), axis=0)
     elif 'bias' in name:
@@ -53,27 +65,56 @@ elif version_two:
 print(f'There are {len(all_weights)} weight parameters.')
 print(f'There are {len(all_biases)} bias parameters.')
 
-fig, ax = plt.subplots(1, 3, figsize=(18, 4))
-ax[0].hist(all_biases, 40)
-ax[0].set_title('Histogram of initial biases')
+plot_weight_dist = True
 
-ax[1].hist(all_weights, 40)
-ax[1].set_title('Histogram of initial weights')
+if plot_weight_dist:
+  fig, ax = plt.subplots(1, 3, figsize=(18, 4))
+  ax[0].hist(all_biases, 40)
+  ax[0].set_title('Histogram of initial biases')
 
-yB, xB = np.histogram(all_biases, 30)
-yW, xW = np.histogram(all_weights, 30)
+  ax[1].hist(all_weights, 40)
+  ax[1].set_title('Histogram of initial weights')
 
-ax[2].plot(
-  (xB[:-1] + xB[1:]) / 2, yB / np.sum(yB), label='Bias'
-)
-ax[2].plot(
-  (xW[:-1] + xW[1:]) / 2, yW / np.sum(yW), label='Weight'
-)
-ax[2].set_title('Density estimate for both')
-ax[2].legend()
+  yB, xB = np.histogram(all_biases, 30)
+  yW, xW = np.histogram(all_weights, 30)
 
-for i in range(3):
-  ax[i].set_xlabel('Initial Value')
-  ax[i].set_ylabel('Density' if i == 2 else 'Count')
+  ax[2].plot(
+    (xB[:-1] + xB[1:]) / 2, yB / np.sum(yB), label='Bias'
+  )
+  ax[2].plot(
+    (xW[:-1] + xW[1:]) / 2, yW / np.sum(yW), label='Weight'
+  )
+  ax[2].set_title('Density estimate for both')
+  ax[2].legend()
 
-plt.show()
+  for i in range(3):
+    ax[i].set_xlabel('Initial Value')
+    ax[i].set_ylabel('Density' if i == 2 else 'Count')
+
+  plt.show()
+
+def draw_weight_hist_per_layers():
+  fig, ax = plt.subplots(1, 2, figsize=(15, 4))
+
+  for name, p in model.named_parameters():
+    these_data = p.data.numpy().flatten()
+    counts, edges = np.histogram(these_data, 10)
+
+    if 'bias' in name:
+      ax[0].plot(
+        (edges[:-1] + edges[1:]) / 2,
+        counts / np.sum(counts),
+        label=f'{name[:-5]} bias (N={len(these_data)})'
+      )
+    elif 'weight' in name:
+      ax[1].plot(
+        (edges[:-1] + edges[1:]) / 2,
+        counts / np.sum(counts),
+        label=f'{name[:-7]} weights (N={len(these_data)})'
+      )
+  
+  ax[0].set_title('Biases per layer')
+  ax[0].legend()
+  ax[1].set_title('Weights per layer')
+  ax[1].legend()
+  plt.show()
