@@ -46,4 +46,3 @@ def create_model(lr=1e-4):
   loss_fn = nn.MSELoss()
   optimizer = torch.optim.Adam(model.parameters(), lr=lr)
   return model, loss_fn, optimizer
-
