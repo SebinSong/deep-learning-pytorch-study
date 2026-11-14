@@ -25,6 +25,7 @@ def _():
   print(f'Cross entropy value is : {H:.3f}')
 
 # BCE in pytorch
+
 def _():
   import torch
   import torch.nn.functional as F
