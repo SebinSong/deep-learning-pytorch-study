@@ -1,32 +1,25 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-x = [1, 2, 4, 6, 5, 4, 0, -4, 5, -2, 6, 10, -9, 1, 3, -6]
+# population
+x = np.array([1, 2, 4, 6, 5, 4, 0, -4, 5, -2, 6, 10, -9, 1, 3, -6], dtype=np.int64)
 n = len(x)
+sample_size = 10
+iteration = 10000
 
-# compute the population mean:
-popmean = np.mean(x)
+# pop mean
+pop_mean = np.mean(x)
+sample_means = np.zeros(iteration)
 
-# compute the sample mean:
-sample = np.random.choice(x, size=5, replace=False)
-sampmean = np.mean(sample)
-
-print('population mean: ', popmean)
-print('sample mean: ', sampmean)
-
-# compute lots of sample means:
-n_expers = 1000
-
-sample_means = np.zeros(n_expers)
-for i in range(n_expers):
-  # step-1: draw a sample
-  sample = np.random.choice(x, size=5, replace=True)
-
-  # step-2: compute its mean
+for i in range(iteration):
+  sample_idxs = np.random.permutation(n)[:sample_size]
+  sample = x[sample_idxs]
   sample_means[i] = np.mean(sample)
 
-# show the results as a histogram:
-
-plt.hist(sample_means, bins=40, density=True) # density=True here normalizes the histogram, kind of like a probability density function
-plt.plot([popmean, popmean], [0, 0.5], 'm--')
+plt.hist(sample_means, bins=30, density=False)
+plt.plot([pop_mean, pop_mean], [0, .3], 'm--')
+plt.ylabel('Count')
+plt.xlabel('Sample mean')
 plt.show()
+
+# print(f'{pop_mean=}, {sample_mean=}')
